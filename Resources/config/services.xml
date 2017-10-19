@@ -6,16 +6,16 @@
 
     <services>
 
-        <service id="datatable.renderer" class="Waldo\DatatableBundle\Util\Formatter\Renderer" shared="false" >
+        <service id="datatable.renderer" class="Iphis\DatatableBundle\Util\Formatter\Renderer" shared="false" >
             <argument type="service" id="templating" />
         </service>
 
-        <service id="datatable.doctrine_builder" class="Waldo\DatatableBundle\Util\Factory\Query\DoctrineBuilder" shared="false">
+        <service id="datatable.doctrine_builder" class="Iphis\DatatableBundle\Util\Factory\Query\DoctrineBuilder" shared="false">
             <argument type="service" id="doctrine.orm.default_entity_manager" />
             <argument type="service" id="request_stack" />
         </service>
 
-        <service id="datatable" class="Waldo\DatatableBundle\Util\Datatable" shared="false">
+        <service id="datatable" class="Iphis\DatatableBundle\Util\Datatable" shared="false">
             <argument type="service" id="doctrine.orm.default_entity_manager" />
             <argument type="service" id="request_stack" />
             <argument type="service" id="datatable.doctrine_builder" />
@@ -23,12 +23,12 @@
             <argument>%datatable%</argument>
         </service>
 
-        <service id="datatable.twig.extension" class="Waldo\DatatableBundle\Twig\Extension\DatatableExtension">
+        <service id="datatable.twig.extension" class="Iphis\DatatableBundle\Twig\Extension\DatatableExtension">
             <argument type="service" id="translator" />
             <tag name="twig.extension" />
         </service>
 
-        <service id="datatable.kernel.listener.terminate" class="Waldo\DatatableBundle\Listener\KernelTerminateListener">
+        <service id="datatable.kernel.listener.terminate" class="Iphis\DatatableBundle\Listener\KernelTerminateListener">
             <argument type="service" id="service_container" />
             <tag name="kernel.event_listener" event="kernel.terminate" method="onKernelTerminate" />
         </service>

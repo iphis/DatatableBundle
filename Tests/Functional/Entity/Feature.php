@@ -1,6 +1,6 @@
 <?php
 
-namespace Waldo\DatatableBundle\Tests\Functional\Entity;
+namespace Iphis\DatatableBundle\Tests\Functional\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 
@@ -10,7 +10,6 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class Feature
 {
-
     /**
      * @ORM\Id
      * @ORM\Column(type="integer")
@@ -37,6 +36,7 @@ class Feature
     public function setId($id)
     {
         $this->id = $id;
+
         return $this;
     }
 
@@ -48,6 +48,7 @@ class Feature
     public function setName($name)
     {
         $this->name = $name;
+
         return $this;
     }
 
@@ -59,6 +60,7 @@ class Feature
     public function setProduct($product)
     {
         $this->product = $product;
+
         return $this;
     }
 }

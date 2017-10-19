@@ -1,12 +1,11 @@
 <?php
 
-namespace Waldo\DatatableBundle\Tests\src\DatatableTest;
+namespace Iphis\DatatableBundle\Tests\src\DatatableTest;
 
+use Iphis\DatatableBundle\Tests\BaseClient;
+use Iphis\DatatableBundle\Util\Datatable;
+use Iphis\DatatableBundle\Util\Factory\Query\DoctrineBuilder;
 use Symfony\Component\HttpFoundation\Request;
-
-use Waldo\DatatableBundle\Util\Factory\Query\DoctrineBuilder;
-use Waldo\DatatableBundle\Tests\BaseClient;
-use Waldo\DatatableBundle\Util\Datatable;
 
 /**
  * @group DoctrineBuilderTest
@@ -14,7 +13,6 @@ use Waldo\DatatableBundle\Util\Datatable;
  */
 class DoctrineBuilderTest extends BaseClient
 {
-
     /**
      * @var Symfony\Bundle\FrameworkBundle\Client
      */
@@ -46,12 +44,12 @@ class DoctrineBuilderTest extends BaseClient
         $this->buildDatabase($this->client);
 
         // Inject a fake request
-        $requestStack = $this->getMock("Symfony\Component\HttpFoundation\RequestStack");
+        $requestStack = $this->createMock("Symfony\Component\HttpFoundation\RequestStack");
 
         $requestStack
-                ->expects($this->any())
-                ->method('getCurrentRequest')
-                ->willReturn(new Request($query));
+            ->expects($this->any())
+            ->method('getCurrentRequest')
+            ->willReturn(new Request($query));
 
         $this->client->getContainer()->set("request_stack", $requestStack);
 
@@ -83,42 +81,45 @@ class DoctrineBuilderTest extends BaseClient
             "columns" => array(
                 0 => array(
                     "searchable" => "true",
-                    "search" => array("regex" => "false", "value" => "")
-                    ),
+                    "search" => array("regex" => "false", "value" => ""),
+                ),
                 1 => array(
                     "searchable" => "true",
-                    "search" => array("regex" => "false", "value" => "")
-                    ),
+                    "search" => array("regex" => "false", "value" => ""),
+                ),
                 2 => array(
                     "searchable" => "true",
-                    "search" => array("regex" => "false", "value" => "")
-                    ),
-            )
+                    "search" => array("regex" => "false", "value" => ""),
+                ),
+            ),
         );
 
         $this->initDatatable($query);
 
         $requestStack = $this->getRequestStackMock();
         $requestStack->expects($this->any())
-                ->method("getCurrentRequest")
-                ->willReturn(new Request($query));
+            ->method("getCurrentRequest")
+            ->willReturn(new Request($query));
 
         $doctrineBuilder = new DoctrineBuilder($this->em, $requestStack);
 
-        $doctrineBuilder->setFields(array(
-                    "name" => "p.name",
-                    "description" => "p.description",
-                    "price" => "p.price",
-                    "_identifier_" => "p.id"
-                ))
-                ->setEntity("Waldo\DatatableBundle\Tests\Functional\Entity\Product", "p")
-                ->setSearch(true)
-                ;
+        $doctrineBuilder->setFields(
+            array(
+                "name" => "p.name",
+                "description" => "p.description",
+                "price" => "p.price",
+                "_identifier_" => "p.id",
+            )
+        )
+            ->setEntity("Iphis\DatatableBundle\Tests\Functional\Entity\Product", "p")
+            ->setSearch(true);
 
-        if($searchType !== null) {
-            $doctrineBuilder->setFilteringType(array(
-                    0 => $searchType
-                ));
+        if ($searchType !== null) {
+            $doctrineBuilder->setFilteringType(
+                array(
+                    0 => $searchType,
+                )
+            );
         }
 
         $res = $doctrineBuilder->getData();
@@ -133,32 +134,35 @@ class DoctrineBuilderTest extends BaseClient
     public function test_addSearchWithoutColumns($searchType, $searchString)
     {
         $query = array(
-            "search" => array("regex" => "false", "value" => $searchString)
-            );
+            "search" => array("regex" => "false", "value" => $searchString),
+        );
 
         $this->initDatatable($query);
 
         $requestStack = $this->getRequestStackMock();
         $requestStack->expects($this->any())
-                ->method("getCurrentRequest")
-                ->willReturn(new Request($query));
+            ->method("getCurrentRequest")
+            ->willReturn(new Request($query));
 
         $doctrineBuilder = new DoctrineBuilder($this->em, $requestStack);
 
-        $doctrineBuilder->setFields(array(
-                    "name" => "p.name",
-                    "description" => "p.description",
-                    "price" => "p.price",
-                    "_identifier_" => "p.id"
-                ))
-                ->setEntity("Waldo\DatatableBundle\Tests\Functional\Entity\Product", "p")
-                ->setSearch(true)
-                ;
+        $doctrineBuilder->setFields(
+            array(
+                "name" => "p.name",
+                "description" => "p.description",
+                "price" => "p.price",
+                "_identifier_" => "p.id",
+            )
+        )
+            ->setEntity("Iphis\DatatableBundle\Tests\Functional\Entity\Product", "p")
+            ->setSearch(true);
 
-        if($searchType !== null) {
-            $doctrineBuilder->setFilteringType(array(
-                    0 => $searchType
-                ));
+        if ($searchType !== null) {
+            $doctrineBuilder->setFilteringType(
+                array(
+                    0 => $searchType,
+                )
+            );
         }
 
         $res = $doctrineBuilder->getData();
@@ -175,8 +179,8 @@ class DoctrineBuilderTest extends BaseClient
         $doctrineBuilder = new DoctrineBuilder($this->em, $requestStack);
 
         $qbMock = $this->getMockBuilder("Doctrine\ORM\QueryBuilder")
-                ->disableOriginalConstructor()
-                ->getMock();
+            ->disableOriginalConstructor()
+            ->getMock();
 
         $res = $doctrineBuilder->setDoctrineQueryBuilder($qbMock);
 
@@ -186,8 +190,7 @@ class DoctrineBuilderTest extends BaseClient
     private function getRequestStackMock()
     {
         return $this->getMockBuilder("Symfony\Component\HttpFoundation\RequestStack")
-                        ->disableOriginalConstructor()
-                        ->getMock();
+            ->disableOriginalConstructor()
+            ->getMock();
     }
-
 }

@@ -1,8 +1,8 @@
 <?php
 
-namespace Waldo\DatatableBundle\Listener;
+namespace Iphis\DatatableBundle\Listener;
 
-use Waldo\DatatableBundle\Util\Datatable;
+use Iphis\DatatableBundle\Util\Datatable;
 
 /**
  * @author valérian Girard <valerian.girard@educagri.fr>
@@ -13,5 +13,4 @@ class KernelTerminateListener
     {
         Datatable::clearInstance();
     }
-
 }

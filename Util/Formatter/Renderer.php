@@ -1,6 +1,6 @@
 <?php
 
-namespace Waldo\DatatableBundle\Util\Formatter;
+namespace Iphis\DatatableBundle\Util\Formatter;
 
 use Symfony\Bundle\FrameworkBundle\Templating\EngineInterface;
 
@@ -22,16 +22,14 @@ class Renderer
     protected $fields;
 
     /**
-     *  @var int
+     * @var int
      */
     protected $identifierIndex;
 
     /**
      * class constructor
      *
-     * @param ContainerInterface $container
-     * @param array $renderers
-     * @param array $fields
+     * @param EngineInterface $templating
      */
     public function __construct(EngineInterface $templating)
     {
@@ -43,7 +41,7 @@ class Renderer
      *
      * @param array $renderers
      * @param array $fields
-     * @return \Waldo\DatatableBundle\Util\Formatter\Renderer
+     * @return \Iphis\DatatableBundle\Util\Formatter\Renderer
      */
     public function build(array $renderers, array $fields)
     {
@@ -57,16 +55,16 @@ class Renderer
     /**
      * return the rendered view using the given content
      *
-     * @param string    $view_path
-     * @param array     $params
+     * @param string $view_path
+     * @param array  $params
      *
      * @return string
      */
     public function applyView($view_path, array $params)
     {
         $out = $this->templating
-                ->render($view_path, $params);
-        
+            ->render($view_path, $params);
+
         return html_entity_decode($out);
     }
 
@@ -99,21 +97,22 @@ class Renderer
                     $view = $this->renderers[$column_index]['view'];
                     $params = isset($this->renderers[$column_index]['params']) ? $this->renderers[$column_index]['params'] : array();
                 } else {
-                    $view = 'WaldoDatatableBundle:Renderers:_default.html.twig';
+                    $view = 'IphisDatatableBundle:Renderers:_default.html.twig';
                 }
-                $params = array_merge($params,
-                        array(
-                    'dt_obj' => $objects[$row_index],
-                    'dt_item' => $data[$row_index][$column_index],
-                    'dt_id' => $identifier_raw,
-                    'dt_line' => $data[$row_index]
-                        )
+                $params = array_merge(
+                    $params,
+                    array(
+                        'dt_obj' => $objects[$row_index],
+                        'dt_item' => $data[$row_index][$column_index],
+                        'dt_id' => $identifier_raw,
+                        'dt_line' => $data[$row_index],
+                    )
                 );
                 $data[$row_index][$column_index] = $this->applyView(
-                        $view, $params
+                    $view,
+                    $params
                 );
             }
         }
     }
-
 }

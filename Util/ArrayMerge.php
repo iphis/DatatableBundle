@@ -1,10 +1,9 @@
 <?php
 
-namespace Waldo\DatatableBundle\Util;
+namespace Iphis\DatatableBundle\Util;
 
 trait ArrayMerge
 {
-
     /**
      * Copy from http://www.php.net/manual/en/function.array-merge-recursive.php#92195
      *
@@ -42,6 +41,7 @@ trait ArrayMerge
                 $merged[$key] = $value;
             }
         }
+
         return $merged;
     }
 }

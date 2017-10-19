@@ -1,13 +1,12 @@
 <?php
 
-namespace Waldo\DatatableBundle\Util\Factory\Query;
-
-use Symfony\Component\HttpFoundation\RequestStack;
+namespace Iphis\DatatableBundle\Util\Factory\Query;
 
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Query;
 use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\ORM\QueryBuilder;
+use Symfony\Component\HttpFoundation\RequestStack;
 
 class DoctrineBuilder implements QueryInterface
 {
@@ -67,14 +66,14 @@ class DoctrineBuilder implements QueryInterface
     protected $hasAction = true;
 
     /**
-     * @var closure
+     * @var \Closure
      */
     protected $renderer;
 
     /**
      * @var boolean
      */
-    protected $search = FALSE;
+    protected $search = false;
 
     /**
      * @var array
@@ -85,7 +84,7 @@ class DoctrineBuilder implements QueryInterface
      * class constructor
      *
      * @param EntityManager $entityManager
-     * @param RequestStack $request
+     * @param RequestStack  $request
      */
     public function __construct(EntityManager $entityManager, RequestStack $request)
     {
@@ -98,7 +97,8 @@ class DoctrineBuilder implements QueryInterface
     /**
      * get the search DQL
      *
-     * @return string
+     * @param QueryBuilder $queryBuilder
+     * @return void
      */
     protected function addSearch(QueryBuilder $queryBuilder)
     {
@@ -125,29 +125,27 @@ class DoctrineBuilder implements QueryInterface
             // Global filtering
             if ((!empty($globalSearch) || $globalSearch['value'] == '0') && $columns[$i]['searchable'] === "true") {
 
-                $qbParam = "sSearch_global_" . $i;
+                $qbParam = "sSearch_global_".$i;
 
                 if ($this->isStringDQLQuery($searchField)) {
 
                     $orExpr->add(
-                            $queryBuilder->expr()->eq($searchField, ':' . $qbParam)
+                        $queryBuilder->expr()->eq($searchField, ':'.$qbParam)
                     );
                     $queryBuilder->setParameter($qbParam, $globalSearch['value']);
-
                 } else {
 
-                    $orExpr->add($queryBuilder->expr()->like($searchField, ":" . $qbParam));
-                    $queryBuilder->setParameter($qbParam, "%" . $globalSearch['value'] . "%");
-
+                    $orExpr->add($queryBuilder->expr()->like($searchField, ":".$qbParam));
+                    $queryBuilder->setParameter($qbParam, "%".$globalSearch['value']."%");
                 }
             }
 
             // Individual filtering
-            $searchName = "sSearch_" . $i;
+            $searchName = "sSearch_".$i;
 
-            if($columns[$i]['searchable'] === "true" && $columns[$i]['search']['value'] != "") {
+            if ($columns[$i]['searchable'] === "true" && $columns[$i]['search']['value'] != "") {
 
-                $queryBuilder->andWhere($queryBuilder->expr()->like($searchField, ":" . $searchName));
+                $queryBuilder->andWhere($queryBuilder->expr()->like($searchField, ":".$searchName));
 
                 if (array_key_exists($i, $filteringType)) {
                     switch ($filteringType[$i]) {
@@ -186,19 +184,19 @@ class DoctrineBuilder implements QueryInterface
      *              \Doctrine\ORM\Query\Expr\Join::WITH,
      *              'e.name like %test%')
      *
-     * @param string      $join          The relationship to join.
-     * @param string      $alias         The alias of the join.
-     * @param string|Join::INNER_JOIN    $type      The type of the join Join::INNER_JOIN | Join::LEFT_JOIN
+     * @param string      $join The relationship to join.
+     * @param string      $alias The alias of the join.
+     * @param string      $type
      * @param string|null $conditionType The condition type constant. Either ON or WITH.
-     * @param string|null $condition     The condition for the join.
+     * @param string|null $condition The condition for the join.
      *
-     * @return Datatable
+     * @return DoctrineBuilder
      */
     public function addJoin($join, $alias, $type = Join::INNER_JOIN, $conditionType = null, $condition = null)
     {
-        if($type === Join::INNER_JOIN) {
+        if ($type === Join::INNER_JOIN) {
             $this->queryBuilder->innerJoin($join, $alias, $conditionType, $condition);
-        } elseif($type === Join::LEFT_JOIN) {
+        } elseif ($type === Join::LEFT_JOIN) {
             $this->queryBuilder->leftJoin($join, $alias, $conditionType, $condition);
         }
 
@@ -211,6 +209,8 @@ class DoctrineBuilder implements QueryInterface
      * get total records
      *
      * @return integer
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \Doctrine\ORM\NonUniqueResultException
      */
     public function getTotalRecords()
     {
@@ -221,15 +221,15 @@ class DoctrineBuilder implements QueryInterface
 
         if (empty($gb) || !in_array($this->fields['_identifier_'], $gb)) {
             $qb->select(
-                    $qb->expr()->count($this->fields['_identifier_'])
-                    );
+                $qb->expr()->count($this->fields['_identifier_'])
+            );
 
             return $qb->getQuery()->getSingleScalarResult();
         } else {
             $qb->resetDQLPart('groupBy');
             $qb->select(
-                    $qb->expr()->countDistinct($this->fields['_identifier_'])
-                    );
+                $qb->expr()->countDistinct($this->fields['_identifier_'])
+            );
 
             return $qb->getQuery()->getSingleScalarResult();
         }
@@ -239,6 +239,8 @@ class DoctrineBuilder implements QueryInterface
      * get total records after filtering
      *
      * @return integer
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \Doctrine\ORM\NonUniqueResultException
      */
     public function getTotalDisplayRecords()
     {
@@ -252,16 +254,15 @@ class DoctrineBuilder implements QueryInterface
 
         if (empty($gb) || !in_array($this->fields['_identifier_'], $gb)) {
             $qb->select(
-                    $qb->expr()->count($this->fields['_identifier_'])
-                       );
+                $qb->expr()->count($this->fields['_identifier_'])
+            );
 
             return $qb->getQuery()->getSingleScalarResult();
-
         } else {
             $qb->resetDQLPart('groupBy');
             $qb->select(
-                    $qb->expr()->countDistinct($this->fields['_identifier_'])
-                    );
+                $qb->expr()->countDistinct($this->fields['_identifier_'])
+            );
 
             return $qb->getQuery()->getSingleScalarResult();
         }
@@ -287,7 +288,7 @@ class DoctrineBuilder implements QueryInterface
             end($orderField);
 
             $qb->orderBy(current($orderField), $order[0]['dir']);
-        } elseif($this->orderField === null) {
+        } elseif ($this->orderField === null) {
             $qb->resetDQLPart('orderBy');
         }
 
@@ -310,11 +311,11 @@ class DoctrineBuilder implements QueryInterface
 
         // get results and process data formatting
         $query = $qb->getQuery();
-        $length = (int) $request->get('length', 0);
+        $length = (int)$request->get('length', 0);
 
         if ($length > 0) {
             $query->setMaxResults($length)
-                    ->setFirstResult((int) $request->get('start'));
+                ->setFirstResult((int)$request->get('start'));
         }
 
         $objects = $query->getResult(Query::HYDRATE_OBJECT);
@@ -323,10 +324,10 @@ class DoctrineBuilder implements QueryInterface
 
         $aliasPattern = self::DQL_ALIAS_PATTERN;
 
-        $get_scalar_key = function($field) use($aliasPattern) {
+        $get_scalar_key = function ($field) use ($aliasPattern) {
 
-            $has_alias = (bool) preg_match_all($aliasPattern, $field, $matches);
-            $_f = ( $has_alias === true ) ? $matches[2][0] : $field;
+            $has_alias = (bool)preg_match_all($aliasPattern, $field, $matches);
+            $_f = ($has_alias === true) ? $matches[2][0] : $field;
             $_f = str_replace('.', '_', $_f);
 
             return $_f;
@@ -412,10 +413,10 @@ class DoctrineBuilder implements QueryInterface
     /**
      * set entity
      *
-     * @param type $entity_name
-     * @param type $entity_alias
+     * @param string $entity_name
+     * @param string $entity_alias
      *
-     * @return Datatable
+     * @return DoctrineBuilder
      */
     public function setEntity($entity_name, $entity_alias)
     {
@@ -431,7 +432,7 @@ class DoctrineBuilder implements QueryInterface
      *
      * @param array $fields
      *
-     * @return Datatable
+     * @return DoctrineBuilder
      */
     public function setFields(array $fields)
     {
@@ -444,10 +445,10 @@ class DoctrineBuilder implements QueryInterface
     /**
      * set order
      *
-     * @param type $order_field
-     * @param type $order_type
+     * @param string $order_field
+     * @param string $order_type
      *
-     * @return Datatable
+     * @return DoctrineBuilder
      */
     public function setOrder($order_field, $order_type)
     {
@@ -464,12 +465,13 @@ class DoctrineBuilder implements QueryInterface
      * @param string $where
      * @param array  $params
      *
-     * @return Datatable
+     * @return DoctrineBuilder
      */
     public function setWhere($where, array $params = array())
     {
         $this->queryBuilder->where($where);
         $this->queryBuilder->setParameters($params);
+
         return $this;
     }
 
@@ -478,11 +480,12 @@ class DoctrineBuilder implements QueryInterface
      *
      * @param string $group
      *
-     * @return Datatable
+     * @return DoctrineBuilder
      */
     public function setGroupBy($group)
     {
         $this->queryBuilder->groupBy($group);
+
         return $this;
     }
 
@@ -491,11 +494,12 @@ class DoctrineBuilder implements QueryInterface
      *
      * @param bool $search
      *
-     * @return Datatable
+     * @return DoctrineBuilder
      */
     public function setSearch($search)
     {
         $this->search = $search;
+
         return $this;
     }
 
@@ -509,6 +513,7 @@ class DoctrineBuilder implements QueryInterface
     public function setDoctrineQueryBuilder(QueryBuilder $queryBuilder)
     {
         $this->queryBuilder = $queryBuilder;
+
         return $this;
     }
 
@@ -530,6 +535,7 @@ class DoctrineBuilder implements QueryInterface
     public function setFilteringType(array $filtering_type)
     {
         $this->filteringType = $filtering_type;
+
         return $this;
     }
 
@@ -564,8 +570,7 @@ class DoctrineBuilder implements QueryInterface
 
                     $dqlQuery = preg_replace($pattern, $replacement, $dqlQuery);
                 }
-
-            } while($lexer->lookahead !== null);
+            } while ($lexer->lookahead !== null);
 
             $dqlQuery = substr($dqlQuery, 0, strripos($dqlQuery, ")") + 1);
 
@@ -612,7 +617,7 @@ class DoctrineBuilder implements QueryInterface
         $keysWord = array(
             "SELECT ",
             " FROM ",
-            " WHERE "
+            " WHERE ",
         );
 
         foreach ($keysWord as $keyWord) {

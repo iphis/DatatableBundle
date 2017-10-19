@@ -23,10 +23,10 @@ doctrine:
         auto_generate_proxy_classes: true
 #        auto_mapping: true
         mappings:
-            WaldoDatatableBundle:
+            IphisDatatableBundle:
               mapping: true
               type: annotation
               dir: 'Tests/Functional/Entity'
-              alias: 'WaldoDatatableBundle'
-              prefix: 'Waldo\DatatableBundle\Tests'
+              alias: 'IphisDatatableBundle'
+              prefix: 'Iphis\DatatableBundle\Tests'
               is_bundle: false

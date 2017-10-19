@@ -1,12 +1,12 @@
 <?php
 
-namespace Waldo\DatatableBundle\Util\Factory\Query;
+namespace Iphis\DatatableBundle\Util\Factory\Query;
 
 use Doctrine\ORM\Query\Expr\Join;
+use Iphis\DatatableBundle\Util\Datatable;
 
 interface QueryInterface
 {
-
     const DQL_ALIAS_PATTERN = "/([A-z]*\.[A-z]+)?\sas\s(.*)$/";
 
     /**
@@ -117,11 +117,11 @@ interface QueryInterface
      *              \Doctrine\ORM\Query\Expr\Join::WITH,
      *              'e.name like %test%')
      *
-     * @param string      $join          The relationship to join.
-     * @param string      $alias         The alias of the join.
+     * @param string      $join The relationship to join.
+     * @param string      $alias The alias of the join.
      * @param string|Join::INNER_JOIN    $type      The type of the join Join::INNER_JOIN | Join::LEFT_JOIN
      * @param string|null $conditionType The condition type constant. Either ON or WITH.
-     * @param string|null $condition     The condition for the join.
+     * @param string|null $condition The condition for the join.
      *
      * @return Datatable
      */

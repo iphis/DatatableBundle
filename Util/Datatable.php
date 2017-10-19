@@ -1,21 +1,17 @@
 <?php
 
-namespace Waldo\DatatableBundle\Util;
-
-use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\HttpFoundation\JsonResponse;
+namespace Iphis\DatatableBundle\Util;
 
 use Doctrine\ORM\EntityManager;
-use Doctrine\ORM\Query;
 use Doctrine\ORM\Query\Expr\Join;
-
-use Waldo\DatatableBundle\Util\Factory\Query\QueryInterface;
-use Waldo\DatatableBundle\Util\Factory\Query\DoctrineBuilder;
-use Waldo\DatatableBundle\Util\Formatter\Renderer;
+use Iphis\DatatableBundle\Util\Factory\Query\DoctrineBuilder;
+use Iphis\DatatableBundle\Util\Factory\Query\QueryInterface;
+use Iphis\DatatableBundle\Util\Formatter\Renderer;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\RequestStack;
 
 class Datatable
 {
-
     /**
      * @var Renderer
      */
@@ -42,7 +38,7 @@ class Datatable
     protected $multiple;
 
     /**
-     * @var \Waldo\DatatableBundle\Util\Factory\Query\QueryInterface
+     * @var \Iphis\DatatableBundle\Util\Factory\Query\QueryInterface
      */
     protected $queryBuilder;
 
@@ -52,7 +48,7 @@ class Datatable
     protected $request;
 
     /**
-     * @var closure
+     * @var \Closure
      */
     protected $renderer;
 
@@ -110,18 +106,19 @@ class Datatable
      * class constructor
      *
      *
-     * @param EntityManager $entityManager
-     * @param RequestStack $request
+     * @param EntityManager   $entityManager
+     * @param RequestStack    $request
      * @param DoctrineBuilder $doctrineBuilder
-     * @param Renderer $renderer
-     * @param array $config
+     * @param Renderer        $renderer
+     * @param array           $config
      */
     public function __construct(
-            EntityManager $entityManager,
-            RequestStack $request,
-            DoctrineBuilder $doctrineBuilder,
-            Renderer $renderer, $config)
-    {
+        EntityManager $entityManager,
+        RequestStack $request,
+        DoctrineBuilder $doctrineBuilder,
+        Renderer $renderer,
+        $config
+    ) {
         $this->em = $entityManager;
         $this->request = $request;
         $this->queryBuilder = $doctrineBuilder;
@@ -156,26 +153,27 @@ class Datatable
      *              \Doctrine\ORM\Query\Expr\Join::WITH,
      *              'e.name like %test%')
      *
-     * @param string      $join          The relationship to join.
-     * @param string      $alias         The alias of the join.
+     * @param string      $join The relationship to join.
+     * @param string      $alias The alias of the join.
      * @param string|Join::INNER_JOIN    $type      The type of the join Join::INNER_JOIN | Join::LEFT_JOIN
      * @param string|null $conditionType The condition type constant. Either ON or WITH.
-     * @param string|null $condition     The condition for the join.
+     * @param string|null $condition The condition for the join.
      *
      * @return Datatable
      */
     public function addJoin($join, $alias, $type = Join::INNER_JOIN, $conditionType = null, $condition = null)
     {
         $this->queryBuilder->addJoin($join, $alias, $type, $conditionType, $condition);
+
         return $this;
     }
 
     /**
      * execute
      *
-     * @param int $hydrationMode
-     *
      * @return JsonResponse
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \Doctrine\ORM\NonUniqueResultException
      */
     public function execute()
     {
@@ -189,9 +187,12 @@ class Datatable
         $id_index = array_search('_identifier_', array_keys($this->getFields()));
         $ids = array();
 
-        array_walk($data, function($val, $key) use ($id_index, &$ids) {
-            $ids[$key] = $val[$id_index];
-        });
+        array_walk(
+            $data,
+            function ($val, $key) use ($id_index, &$ids) {
+                $ids[$key] = $val[$id_index];
+            }
+        );
 
         if (!is_null($this->fixedData)) {
             $this->fixedData = array_reverse($this->fixedData);
@@ -209,18 +210,20 @@ class Datatable
         }
 
         if (!empty($this->multiple)) {
-            array_walk($data,
-                    function($val, $key) use(&$data, $ids) {
-                array_unshift($val, sprintf('<input type="checkbox" name="dataTables[actions][]" value="%s" />', $ids[$key]));
-                $data[$key] = $val;
-            });
+            array_walk(
+                $data,
+                function ($val, $key) use (&$data, $ids) {
+                    array_unshift($val, sprintf('<input type="checkbox" name="dataTables[actions][]" value="%s" />', $ids[$key]));
+                    $data[$key] = $val;
+                }
+            );
         }
 
         $output = array(
             "draw" => $request->query->getInt('draw'),
             "recordsTotal" => $iTotalRecords,
             "recordsFiltered" => $iTotalDisplayRecords,
-            "data" => $data
+            "data" => $data,
         );
 
         return new JsonResponse($output);
@@ -232,7 +235,8 @@ class Datatable
      *
      * @param string $id
      *
-     * @return Datatable .
+     * @return Datatable
+     * @throws \Exception
      */
     public static function getInstance($id)
     {
@@ -339,14 +343,15 @@ class Datatable
     /**
      * set entity
      *
-     * @param type $entityName
-     * @param type $entityAlias
+     * @param string $entityName
+     * @param string $entityAlias
      *
      * @return Datatable
      */
     public function setEntity($entityName, $entityAlias)
     {
         $this->queryBuilder->setEntity($entityName, $entityAlias);
+
         return $this;
     }
 
@@ -360,33 +365,36 @@ class Datatable
     public function setFields(array $fields)
     {
         $this->queryBuilder->setFields($fields);
+
         return $this;
     }
 
     /**
      * set order
      *
-     * @param type $orderField
-     * @param type $orderType
+     * @param string $orderField
+     * @param string $orderType
      *
      * @return Datatable
      */
     public function setOrder($orderField, $orderType)
     {
         $this->queryBuilder->setOrder($orderField, $orderType);
+
         return $this;
     }
 
     /**
      * set fixed data
      *
-     * @param type $data
+     * @param array $data
      *
      * @return Datatable
      */
     public function setFixedData($data)
     {
         $this->fixedData = $data;
+
         return $this;
     }
 
@@ -436,6 +444,7 @@ class Datatable
     public function setRenderer(\Closure $renderer)
     {
         $this->renderer = $renderer;
+
         return $this;
     }
 
@@ -454,7 +463,7 @@ class Datatable
      *      ->setRenderers(
      *          array(
      *             2 => array(
-     *               'view' => 'WaldoDatatableBundle:Renderers:_actions.html.twig',
+     *               'view' => 'IphisDatatableBundle:Renderers:_actions.html.twig',
      *               'params' => array(
      *                  'edit_route'    => 'matche_edit',
      *                  'delete_route'  => 'matche_delete',
@@ -490,6 +499,7 @@ class Datatable
     public function setWhere($where, array $params = array())
     {
         $this->queryBuilder->setWhere($where, $params);
+
         return $this;
     }
 
@@ -503,6 +513,7 @@ class Datatable
     public function setGroupBy($groupby)
     {
         $this->queryBuilder->setGroupBy($groupby);
+
         return $this;
     }
 
@@ -517,6 +528,7 @@ class Datatable
     {
         $this->search = $search;
         $this->queryBuilder->setSearch($search || $this->globalSearch);
+
         return $this;
     }
 
@@ -531,6 +543,7 @@ class Datatable
     {
         $this->globalSearch = $globalSearch;
         $this->queryBuilder->setSearch($globalSearch || $this->search);
+
         return $this;
     }
 
@@ -540,6 +553,7 @@ class Datatable
      * @param string $id
      *
      * @return Datatable
+     * @throws \Exception
      */
     public function setDatatableId($id)
     {
@@ -555,7 +569,8 @@ class Datatable
     /**
      * hasInstanceId
      *
-     * @param strin $id
+     * @param string $id
+     * @return bool
      */
     public function hasInstanceId($id)
     {
@@ -581,17 +596,17 @@ class Datatable
      *
      * @param array $multiple
      *
-     * @return \Waldo\DatatableBundle\Util\Datatable
+     * @return \Iphis\DatatableBundle\Util\Datatable
      */
     public function setMultiple(array $multiple)
     {
         $this->multiple = $multiple;
 
-        if(count($this->multiple) > 0) {
-            if(!in_array(0, $this->notFilterableFields)) {
+        if (count($this->multiple) > 0) {
+            if (!in_array(0, $this->notFilterableFields)) {
                 $this->notFilterableFields[] = 0;
             }
-            if(!in_array(0, $this->notSortableFields)) {
+            if (!in_array(0, $this->notSortableFields)) {
                 $this->notSortableFields[] = 0;
             }
         }
@@ -628,11 +643,12 @@ class Datatable
      *
      * @param array $searchFields
      *
-     * @return \Waldo\DatatableBundle\Util\Datatable
+     * @return \Iphis\DatatableBundle\Util\Datatable
      */
     public function setSearchFields(array $searchFields)
     {
         $this->searchFields = $searchFields;
+
         return $this;
     }
 
@@ -645,11 +661,12 @@ class Datatable
      *
      * @param array $notFilterableFields
      *
-     * @return \Waldo\DatatableBundle\Util\Datatable
+     * @return \Iphis\DatatableBundle\Util\Datatable
      */
     public function setNotFilterableFields(array $notFilterableFields)
     {
         $this->notFilterableFields = $notFilterableFields;
+
         return $this;
     }
 
@@ -672,11 +689,12 @@ class Datatable
      *
      * @param array $notSortableFields
      *
-     * @return \Waldo\DatatableBundle\Util\Datatable
+     * @return \Iphis\DatatableBundle\Util\Datatable
      */
     public function setNotSortableFields(array $notSortableFields)
     {
         $this->notSortableFields = $notSortableFields;
+
         return $this;
     }
 
@@ -699,11 +717,12 @@ class Datatable
      *
      * @param array $hiddenFields
      *
-     * @return \Waldo\DatatableBundle\Util\Datatable
+     * @return \Iphis\DatatableBundle\Util\Datatable
      */
     public function setHiddenFields(array $hiddenFields)
     {
         $this->hiddenFields = $hiddenFields;
+
         return $this;
     }
 
@@ -730,11 +749,12 @@ class Datatable
      *
      * @param array $filteringType
      *
-     * @return \Waldo\DatatableBundle\Util\Datatable
+     * @return \Iphis\DatatableBundle\Util\Datatable
      */
     public function setFilteringType(array $filteringType)
     {
         $this->queryBuilder->setFilteringType($filteringType);
+
         return $this;
     }
 }

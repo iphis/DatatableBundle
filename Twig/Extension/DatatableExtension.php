@@ -1,17 +1,13 @@
 <?php
 
-namespace Waldo\DatatableBundle\Twig\Extension;
+namespace Iphis\DatatableBundle\Twig\Extension;
 
-use Symfony\Component\Form\Extension\Core\Type\HiddenType;
-use Symfony\Component\Form\FormFactoryInterface;
+use Iphis\DatatableBundle\Util\ArrayMerge;
+use Iphis\DatatableBundle\Util\Datatable;
 use Symfony\Component\Translation\TranslatorInterface;
-use Waldo\DatatableBundle\Util\Datatable;
-use Waldo\DatatableBundle\Util\ArrayMerge;
-use Twig_SimpleFunction;
 
 class DatatableExtension extends \Twig_Extension
 {
-
     use ArrayMerge;
 
     protected $callbackMethodName = array(
@@ -28,7 +24,7 @@ class DatatableExtension extends \Twig_Extension
         "stateLoaded",
         "stateLoadParams",
         "stateSaveCallback",
-        "stateSaveParams"
+        "stateSaveParams",
     );
 
     /**
@@ -37,47 +33,63 @@ class DatatableExtension extends \Twig_Extension
     protected $translator;
 
     /**
-     * @param DataCollectorTranslator $translator
+     * @param TranslatorInterface $translator
      */
     public function __construct(TranslatorInterface $translator)
     {
         $this->translator = $translator;
     }
 
-        /**
+    /**
      * {@inheritdoc}
      */
     public function getFunctions()
     {
-        return array(
-            new Twig_SimpleFunction('datatable', array($this, 'datatable'),
-                    array("is_safe" => array("html"), 'needs_environment' => true)),
-            new Twig_SimpleFunction('datatable_html', array($this, 'datatableHtml'),
-                    array("is_safe" => array("html"), 'needs_environment' => true)),
-            new Twig_SimpleFunction('datatable_js', array($this, 'datatableJs'),
-                    array("is_safe" => array("html"), 'needs_environment' => true))
-        );
+        return [
+            new \Twig_SimpleFunction(
+                'datatable', [$this, 'datatable'],
+                ["is_safe" => ["html"], 'needs_environment' => true]
+            ),
+            new \Twig_SimpleFunction(
+                'datatable_html', [$this, 'datatableHtml'],
+                ["is_safe" => ["html"], 'needs_environment' => true]
+            ),
+            new \Twig_SimpleFunction(
+                'datatable_js', [$this, 'datatableJs'],
+                ["is_safe" => ["html"], 'needs_environment' => true]
+            ),
+        ];
     }
 
+    /**
+     * @return array
+     */
     public function getFilters()
     {
-        return array(
-            new \Twig_SimpleFilter('printDatatableOption', array($this, 'printDatatableOption'),
-                    array("is_safe" => array("html")))
-        );
+        return [
+            new \Twig_SimpleFilter(
+                'printDatatableOption', [$this, 'printDatatableOption'],
+                ["is_safe" => ["html"]]
+            ),
+        ];
     }
 
     /**
      * Converts a string to time
      *
-     * @param string $string
-     * @return int
+     * @param \Twig_Environment $twig
+     * @param                   $options
+     * @return string
+     * @throws \Exception
+     * @throws \Twig_Error_Loader
+     * @throws \Twig_Error_Runtime
+     * @throws \Twig_Error_Syntax
      */
     public function datatable(\Twig_Environment $twig, $options)
     {
         $options = $this->buildDatatableTemplate($options);
 
-        $mainTemplate = array_key_exists('main_template', $options) ? $options['main_template'] : 'WaldoDatatableBundle:Main:index.html.twig';
+        $mainTemplate = array_key_exists('main_template', $options) ? $options['main_template'] : 'IphisDatatableBundle:Main:index.html.twig';
 
         return $twig->render($mainTemplate, $options);
     }
@@ -85,14 +97,19 @@ class DatatableExtension extends \Twig_Extension
     /**
      * Converts a string to time
      *
-     * @param string $string
-     * @return int
+     * @param \Twig_Environment $twig
+     * @param                   $options
+     * @return string
+     * @throws \Twig_Error_Loader
+     * @throws \Twig_Error_Runtime
+     * @throws \Twig_Error_Syntax
+     * @throws \Exception
      */
     public function datatableJs(\Twig_Environment $twig, $options)
     {
         $options = $this->buildDatatableTemplate($options, "js");
 
-        $mainTemplate = array_key_exists('main_template', $options) ? $options['js_template'] : 'WaldoDatatableBundle:Main:datatableJs.html.twig';
+        $mainTemplate = array_key_exists('main_template', $options) ? $options['js_template'] : 'IphisDatatableBundle:Main:datatableJs.html.twig';
 
         return $twig->render($mainTemplate, $options);
     }
@@ -100,13 +117,18 @@ class DatatableExtension extends \Twig_Extension
     /**
      * Converts a string to time
      *
-     * @param string $string
-     * @return int
+     * @param \Twig_Environment $twig
+     * @param                   $options
+     * @return string
+     * @throws \Exception
+     * @throws \Twig_Error_Loader
+     * @throws \Twig_Error_Runtime
+     * @throws \Twig_Error_Syntax
      */
     public function datatableHtml(\Twig_Environment $twig, $options)
     {
         if (!isset($options['id'])) {
-            $options['id'] = 'ali-dta_' . md5(mt_rand(1, 100));
+            $options['id'] = 'ali-dta_'.md5(mt_rand(1, 100));
         }
         $dt = Datatable::getInstance($options['id']);
 
@@ -115,7 +137,7 @@ class DatatableExtension extends \Twig_Extension
         $options['searchFields'] = $dt->getSearchFields();
         $options['multiple'] = $dt->getMultiple();
 
-        $mainTemplate = 'WaldoDatatableBundle:Main:datatableHtml.html.twig';
+        $mainTemplate = 'IphisDatatableBundle:Main:datatableHtml.html.twig';
 
         if (isset($options['html_template'])) {
             $mainTemplate = $options['html_template'];
@@ -124,10 +146,16 @@ class DatatableExtension extends \Twig_Extension
         return $twig->render($mainTemplate, $options);
     }
 
+    /**
+     * @param      $options
+     * @param null $type
+     * @return mixed
+     * @throws \Exception
+     */
     private function buildDatatableTemplate($options, $type = null)
     {
         if (!isset($options['id'])) {
-            $options['id'] = 'ali-dta_' . md5(mt_rand(1, 100));
+            $options['id'] = 'ali-dta_'.md5(mt_rand(1, 100));
         }
 
         $dt = Datatable::getInstance($options['id']);
@@ -142,7 +170,7 @@ class DatatableExtension extends \Twig_Extension
         $options['searchFields'] = $dt->getSearchFields();
         $options['sort'] = $dt->getOrderField() === null ? null : array(
             array_search($dt->getOrderField(), array_values($dt->getFields())),
-            $dt->getOrderType()
+            $dt->getOrderType(),
         );
 
         if ($type == "js") {
@@ -152,80 +180,93 @@ class DatatableExtension extends \Twig_Extension
         return $options;
     }
 
+    /**
+     * @param           $options
+     * @param Datatable $dt
+     */
     private function buildJs(&$options, $dt)
     {
-        if(array_key_exists("ajax", $options['js']) && !is_array($options['js']['ajax'])) {
+        if (array_key_exists("ajax", $options['js']) && !is_array($options['js']['ajax'])) {
             $options['js']['ajax'] = array(
                 "url" => $options['js']['ajax'],
-                "type" => "POST"
+                "type" => "POST",
             );
         }
 
         if (count($dt->getHiddenFields()) > 0) {
             $options['js']['columnDefs'][] = array(
                 "visible" => false,
-                "targets" => $dt->getHiddenFields()
+                "targets" => $dt->getHiddenFields(),
             );
         }
         if (count($dt->getNotSortableFields()) > 0) {
             $options['js']['columnDefs'][] = array(
                 "orderable" => false,
-                "targets" => $dt->getNotSortableFields()
+                "targets" => $dt->getNotSortableFields(),
             );
         }
         if (count($dt->getNotFilterableFields()) > 0) {
             $options['js']['columnDefs'][] = array(
                 "searchable" => false,
-                "targets" => $dt->getNotFilterableFields()
+                "targets" => $dt->getNotFilterableFields(),
             );
         }
 
         $this->buildTranslation($options);
     }
 
+    /**
+     * @param $options
+     */
     private function buildTranslation(&$options)
     {
-        if(!array_key_exists("language", $options['js'])) {
+        if (!array_key_exists("language", $options['js'])) {
             $options['js']['language'] = array();
         }
 
         $baseLanguage = array(
-                "processing" =>     $this->translator->trans("datatable.datatable.processing"),
-                "search"=>          $this->translator->trans("datatable.datatable.search"),
-                "lengthMenu"=>      $this->translator->trans("datatable.datatable.lengthMenu"),
-                "info"=>            $this->translator->trans("datatable.datatable.info"),
-                "infoEmpty"=>       $this->translator->trans("datatable.datatable.infoEmpty"),
-                "infoFiltered"=>    $this->translator->trans("datatable.datatable.infoFiltered"),
-                "infoPostFix"=>     $this->translator->trans("datatable.datatable.infoPostFix"),
-                "loadingRecords"=>  $this->translator->trans("datatable.datatable.loadingRecords"),
-                "zeroRecords"=>     $this->translator->trans("datatable.datatable.zeroRecords"),
-                "emptyTable"=>      $this->translator->trans("datatable.datatable.emptyTable"),
-                "searchPlaceholder" => $this->translator->trans("datatable.datatable.searchPlaceholder"),
-                "paginate"=> array (
-                    "first"=>       $this->translator->trans("datatable.datatable.paginate.first"),
-                    "previous"=>    $this->translator->trans("datatable.datatable.paginate.previous"),
-                    "next"=>        $this->translator->trans("datatable.datatable.paginate.next"),
-                    "last"=>        $this->translator->trans("datatable.datatable.paginate.last")
-                ),
-                "aria"=> array(
-                    "sortAscending"=>  $this->translator->trans("datatable.datatable.aria.sortAscending"),
-                    "sortDescending"=> $this->translator->trans("datatable.datatable.aria.sortDescending")
-                ));
+            "processing" => $this->translator->trans("datatable.datatable.processing"),
+            "search" => $this->translator->trans("datatable.datatable.search"),
+            "lengthMenu" => $this->translator->trans("datatable.datatable.lengthMenu"),
+            "info" => $this->translator->trans("datatable.datatable.info"),
+            "infoEmpty" => $this->translator->trans("datatable.datatable.infoEmpty"),
+            "infoFiltered" => $this->translator->trans("datatable.datatable.infoFiltered"),
+            "infoPostFix" => $this->translator->trans("datatable.datatable.infoPostFix"),
+            "loadingRecords" => $this->translator->trans("datatable.datatable.loadingRecords"),
+            "zeroRecords" => $this->translator->trans("datatable.datatable.zeroRecords"),
+            "emptyTable" => $this->translator->trans("datatable.datatable.emptyTable"),
+            "searchPlaceholder" => $this->translator->trans("datatable.datatable.searchPlaceholder"),
+            "paginate" => array(
+                "first" => $this->translator->trans("datatable.datatable.paginate.first"),
+                "previous" => $this->translator->trans("datatable.datatable.paginate.previous"),
+                "next" => $this->translator->trans("datatable.datatable.paginate.next"),
+                "last" => $this->translator->trans("datatable.datatable.paginate.last"),
+            ),
+            "aria" => array(
+                "sortAscending" => $this->translator->trans("datatable.datatable.aria.sortAscending"),
+                "sortDescending" => $this->translator->trans("datatable.datatable.aria.sortDescending"),
+            ),
+        );
 
         $options['js']['language'] = $this->arrayMergeRecursiveDistinct($baseLanguage, $options['js']['language']);
     }
 
+    /**
+     * @param $var
+     * @param $elementName
+     * @return string
+     */
     public function printDatatableOption($var, $elementName)
     {
-        if(is_bool($var)) {
+        if (is_bool($var)) {
             return $var === true ? 'true' : 'false';
         }
 
-        if(is_array($var)) {
+        if (is_array($var)) {
             return json_encode($var);
         }
 
-        if(in_array($elementName, $this->callbackMethodName)) {
+        if (in_array($elementName, $this->callbackMethodName)) {
             return $var;
         }
 
@@ -241,5 +282,4 @@ class DatatableExtension extends \Twig_Extension
     {
         return 'DatatableBundle';
     }
-
 }

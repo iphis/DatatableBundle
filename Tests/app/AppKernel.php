@@ -1,7 +1,7 @@
 <?php
 
-use Symfony\Component\HttpKernel\Kernel;
 use Symfony\Component\Config\Loader\LoaderInterface;
+use Symfony\Component\HttpKernel\Kernel;
 
 class AppKernel extends Kernel
 {
@@ -11,13 +11,17 @@ class AppKernel extends Kernel
             new \Symfony\Bundle\FrameworkBundle\FrameworkBundle(),
             new \Symfony\Bundle\TwigBundle\TwigBundle(),
             new \Doctrine\Bundle\DoctrineBundle\DoctrineBundle(),
-            new \Waldo\DatatableBundle\WaldoDatatableBundle()
+            new \Iphis\DatatableBundle\IphisDatatableBundle(),
         );
     }
 
+    /**
+     * @param LoaderInterface $loader
+     * @throws Exception
+     */
     public function registerContainerConfiguration(LoaderInterface $loader)
     {
-        $loader->load(__DIR__ . '/config/config_test.yml');
+        $loader->load(__DIR__.'/config/config_test.yml');
     }
 
     /**
@@ -25,7 +29,7 @@ class AppKernel extends Kernel
      */
     public function getCacheDir()
     {
-        $cacheDir = sys_get_temp_dir() . '/cache';
+        $cacheDir = sys_get_temp_dir().'/cache';
         if (!is_dir($cacheDir)) {
             mkdir($cacheDir, 0777, true);
         }
@@ -38,7 +42,7 @@ class AppKernel extends Kernel
      */
     public function getLogDir()
     {
-        $logDir = sys_get_temp_dir() . '/logs';
+        $logDir = sys_get_temp_dir().'/logs';
         if (!is_dir($logDir)) {
             mkdir($logDir, 0777, true);
         }

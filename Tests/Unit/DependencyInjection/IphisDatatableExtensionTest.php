@@ -1,17 +1,18 @@
 <?php
 
-namespace Waldo\DatatableBundle\Tests\Unit\DependencyInjection;
+namespace Iphis\DatatableBundle\Tests\Unit\DependencyInjection;
 
-use Waldo\DatatableBundle\DependencyInjection\WaldoDatatableExtension;
+use Iphis\DatatableBundle\DependencyInjection\IphisDatatableExtension;
+use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 /**
- * @group WaldoDatatableExtensionTest
+ * @group IphisDatatableExtensionTest
  */
-class WaldoDatatableExtensionTest extends \PHPUnit_Framework_TestCase
+class IphisDatatableExtensionTest extends TestCase
 {
     /**
-     * @var WaldoDatatableExtension
+     * @var
      */
     private $extension;
 
@@ -22,7 +23,7 @@ class WaldoDatatableExtensionTest extends \PHPUnit_Framework_TestCase
 
     protected function setUp()
     {
-        $this->extension = new WaldoDatatableExtension();
+        $this->extension = new IphisDatatableExtension();
 
         $this->container = new ContainerBuilder();
         $this->container->registerExtension($this->extension);
@@ -43,7 +44,7 @@ class WaldoDatatableExtensionTest extends \PHPUnit_Framework_TestCase
     public function testWithYamlConfig()
     {
         $configYaml = <<<YAML
-waldo_datatable:
+iphis_datatable:
     all:
         action:           true
         search:           false
@@ -70,5 +71,4 @@ YAML;
 
         $this->assertEquals("[[5,10, 25, 50, -1], [5,10, 25, 50, 'All']]", $parseConfig['js']['aLengthMenu']);
     }
-
 }

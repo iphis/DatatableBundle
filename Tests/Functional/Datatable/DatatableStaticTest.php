@@ -1,10 +1,9 @@
 <?php
 
-namespace Waldo\DatatableBundle\Tests\src\DatatableTest;
+namespace Iphis\DatatableBundle\Tests\src\DatatableTest;
 
-use Waldo\DatatableBundle\Tests\BaseClient;
-
-use Waldo\DatatableBundle\Util\Datatable;
+use Iphis\DatatableBundle\Tests\BaseClient;
+use Iphis\DatatableBundle\Util\Datatable;
 
 /**
  * Description of DatatableStaticTest
@@ -18,6 +17,7 @@ class DatatableStaticTest extends BaseClient
     /**
      * @expectedException \Exception
      * @expectedExceptionMessage No instance found for datatable, you should set a datatable id in your action with "setDatatableId" using the id from your view
+     * @throws \Exception
      */
     public function test_getInstanceWithoutInstance()
     {
