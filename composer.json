@@ -24,17 +24,17 @@
             "name": "Tobias Knipping",
             "email": "knipping@tk-schulsoftware.de",
             "role": "Developer"
-        },
+        }
     ],
     "require": {
         "php": ">=7.0",
-	"twig/twig": "~2.0",
-        "doctrine/common": "~2.1"
+	"twig/twig": "~2.4",
+        "doctrine/common": "~2.8"
     },
     "require-dev": {
         "symfony/symfony": ">=2.6.0,<=4.0",
-        "doctrine/doctrine-bundle": "~1.4",
-        "doctrine/orm": "^2.4.8",
+        "doctrine/doctrine-bundle": "~1.7",
+        "doctrine/orm": "^2.5",
         "phpunit/phpunit": "~6.0"
     },
     "autoload": {
